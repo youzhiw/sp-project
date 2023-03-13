@@ -257,12 +257,16 @@ class ResnetEncoder(nn.Module):
 # Train PmPNet
 def NetTrain(wdir,train_log,net_model,train_loader,learning_rate,num_epochs,batch_size,device):
     model = ResnetEncoder(BasicBlock, DecodeBlock, [2, 2], 2)
-    model.cuda()
+    if device.type == "cuda":
+        model.cuda()
     
     f = open(f"{wdir}/{train_log}.txt","w")
     f.close()
 
-    class_weights = torch.FloatTensor([20.]).cuda()
+    if device.type == "cuda":
+        class_weights = torch.FloatTensor([20.]).cuda()
+    else:
+        class_weights = torch.FloatTensor([20.])
     criterion = nn.MSELoss(reduction='mean')
     PmPcriterion = torch.nn.BCEWithLogitsLoss(pos_weight = class_weights)
     traveltimecriterion = nn.L1Loss(reduction='mean')
