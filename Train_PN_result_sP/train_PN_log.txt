@@ -1,0 +1,10 @@
+Bach_Size 50 Epoch 1 10 Step 1 34 Loss 5.4572 Loss1 3.3494 Loss2 1.5317 Loss3 0.5761
+Bach_Size 50 Epoch 2 10 Step 1 34 Loss 1.8149 Loss1 0.2790 Loss2 1.3350 Loss3 0.2009
+Bach_Size 50 Epoch 3 10 Step 1 34 Loss 1.0594 Loss1 0.1363 Loss2 0.7360 Loss3 0.1872
+Bach_Size 50 Epoch 4 10 Step 1 34 Loss 1.0143 Loss1 0.0899 Loss2 0.8112 Loss3 0.1132
+Bach_Size 50 Epoch 5 10 Step 1 34 Loss 1.1953 Loss1 0.1075 Loss2 0.9060 Loss3 0.1818
+Bach_Size 50 Epoch 6 10 Step 1 34 Loss 1.2335 Loss1 0.1134 Loss2 0.9413 Loss3 0.1788
+Bach_Size 50 Epoch 7 10 Step 1 34 Loss 0.5334 Loss1 0.0813 Loss2 0.3445 Loss3 0.1077
+Bach_Size 50 Epoch 8 10 Step 1 34 Loss 0.9704 Loss1 0.0870 Loss2 0.7732 Loss3 0.1102
+Bach_Size 50 Epoch 9 10 Step 1 34 Loss 0.2989 Loss1 0.0404 Loss2 0.1362 Loss3 0.1223
+Bach_Size 50 Epoch 10 10 Step 1 34 Loss 0.3550 Loss1 0.0819 Loss2 0.1832 Loss3 0.0899
