@@ -43,7 +43,7 @@ def readin_data_train(datadir,readindata,batch_size):
     envelop_signal = preprocessing.normalize(envelop_signal, norm = 'max') 
     envelop_signal = preprocessing.scale(envelop_signal, axis = 0)
     
-    prolong_length = 8
+    prolong_length = 8 # originally was 8
     sample_num = len(envelop_signal)
 
     X = np.concatenate((envelop_signal, np.ones([sample_num, prolong_length])*PmP_dist[:,np.newaxis],\
@@ -446,7 +446,7 @@ def plot_modeva(wdir,train_log,prcurve_file,predict_file,plot_fname):
     ax1.semilogy(data['epoch'][np.arange(0,len(data['epoch']),rate)], data['residual'][np.arange(0,len(data['epoch']),rate)], "o", markersize=6, color = "black")
     ax1.set_xlabel('Epoch',font2)
     ax1.set_ylabel('Loss',font2)
-    plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
+    plt.grid(visible=True, which='minor', color='#999999', linestyle='-', alpha=0.2) # the previous version was b = False
     ax1.set_ylim(0.5*min(data['residual']),1.2*max(data['residual']),)
     ax1.yaxis.grid(True)
     ax1.set_xlim(-0.05,0.05+80)
@@ -462,7 +462,7 @@ def plot_modeva(wdir,train_log,prcurve_file,predict_file,plot_fname):
     ax2.set_ylabel('Recall',font2)
     ax2.xaxis.set_minor_locator(plt.MultipleLocator(0.1))
     ax2.yaxis.set_minor_locator(plt.MultipleLocator(0.1))
-    plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
+    plt.grid(visible=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
     ax2.yaxis.grid(True)
     ax2.xaxis.grid(True)
     ax2.set_xlim(-0.05,1+0.05)
@@ -480,9 +480,9 @@ def plot_modeva(wdir,train_log,prcurve_file,predict_file,plot_fname):
     ax3.set_xlim(-2.0,2.0+0.001)
     ax3.set_xticks(np.arange(-2.0,2.0+0.001,1))
     ax3.xaxis.set_minor_locator(plt.MultipleLocator(0.5))
-    plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
+    plt.grid(visible=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
     ax3.xaxis.grid(True)
-    plt.grid(b=True, which='minor')
+    plt.grid(visible=True, which='minor')
     ax3.tick_params(axis='both', which='major', labelsize=14)
     plt.savefig(f"{wdir}/{plot_fname}.png", bbox_inches='tight', dpi=300)
     plt.show()
