@@ -36,6 +36,7 @@ def retrieveVariables(filename):
 def readin_data_train(datadir,readindata,batch_size):
     [envelop_signal, PmP_time, PmP_label, PmP_dist, PmP_evdp, PmP_mag, PmP_stlo, PmP_stla, PmP_evlo, PmP_evla, PmP_evid, PmP_fname] = retrieveVariables(f"{datadir}/{readindata}")
 
+    print("size of data: ",len(envelop_signal))
     PmP_dist = (np.array(PmP_dist)-50)/150
     PmP_evdp = np.array(PmP_evdp)/20
     PmP_time = (np.array(PmP_time)-5)/25
