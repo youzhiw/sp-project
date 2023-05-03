@@ -17,6 +17,7 @@ from sklearn.decomposition import PCA
 from matplotlib.backends.backend_pdf import PdfPages
 from obspy.clients.iris import Client
 client = Client()
+model = TauPyModel(f"/mnt/c/Users/youzh/Documents/My documents(not synced)/sP_Workflow/hk.npz")
 
 def getEvtID( event):
     #inpath = r"C:\Users\youzh\Documents\My documents(not synced)\sP_Workflow\Download\SAC"
@@ -62,6 +63,19 @@ def set_window(st, Tp, TsPmP, TsPn, Twbefore=3, Twafter=2, Tpbefore=0.3, Tplen=0
     
     ax1.axvline(x=st[2].stats.sac.t1, color="red", alpha=0.5, linewidth=2,label="Predicted")
     ax1.axvline(x=Tp+st[0].stats.sac.o, color="blue", alpha=0.5, linewidth=2,label="hand-picked")
+
+    # plotting S-wave into the graph
+    sachd = st[0].stats.sac
+    sdep = sachd["evdp"]
+    distaz = client.distaz(sachd["stla"], sachd["stlo"], sachd["evla"], sachd["evlo"])
+    gcarc = distaz['distance']
+    radist = gcarc 
+    arrival_S = model.get_ray_paths(source_depth_in_km=sdep, distance_in_degree=radist, phase_list=['s', 'S'])
+    Ts = arrival_S[0].time
+    if Ts- TsPmP< 2:
+        arrival_p = model.get_ray_paths(source_depth_in_km=sdep, distance_in_degree=radist, phase_list=['p', 'P'])
+        Tp_pred = arrival_p[0].time
+        ax1.axvline(x=Ts-Tp_pred+Tp+st[0].stats.sac.o, color="yellow", alpha=0.5, linewidth=2, label="S")
     
     
     upperY = 1.2*max(st[2].data[idxw1:idxw2])

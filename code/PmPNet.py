@@ -40,6 +40,8 @@ def readin_data_train(datadir,readindata,batch_size):
     PmP_dist = (np.array(PmP_dist)-50)/150
     PmP_evdp = np.array(PmP_evdp)/20
     PmP_time = (np.array(PmP_time)-5)/25
+    #q: why do did we divide by 20 and 25?
+    
 
     envelop_signal = preprocessing.normalize(envelop_signal, norm = 'max') 
     envelop_signal = preprocessing.scale(envelop_signal, axis = 0)
