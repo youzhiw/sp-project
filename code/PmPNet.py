@@ -36,17 +36,14 @@ def retrieveVariables(filename):
 def readin_data_train(datadir,readindata,batch_size):
     [envelop_signal, PmP_time, PmP_label, PmP_dist, PmP_evdp, PmP_mag, PmP_stlo, PmP_stla, PmP_evlo, PmP_evla, PmP_evid, PmP_fname] = retrieveVariables(f"{datadir}/{readindata}")
 
-    print("size of data: ",len(envelop_signal))
     PmP_dist = (np.array(PmP_dist)-50)/150
     PmP_evdp = np.array(PmP_evdp)/20
     PmP_time = (np.array(PmP_time)-5)/25
-    #q: why do did we divide by 20 and 25?
-    
 
     envelop_signal = preprocessing.normalize(envelop_signal, norm = 'max') 
     envelop_signal = preprocessing.scale(envelop_signal, axis = 0)
     
-    prolong_length = 8 # originally was 8
+    prolong_length = 8
     sample_num = len(envelop_signal)
 
     X = np.concatenate((envelop_signal, np.ones([sample_num, prolong_length])*PmP_dist[:,np.newaxis],\
@@ -168,13 +165,10 @@ class ResnetEncoder(nn.Module):
         self.decode_bn1 = nn.BatchNorm1d(64)
         self.decode_layer1 = self._make_layer(decodeblock, 64, 64, num_blocks[0])
         self.decode_layer2 = self._make_layer(decodeblock, 64, 64, num_blocks[1])
-        #self.decode_t_conv2 = nn.ConvTranspose1d(64, 64, kernel_size=4, stride=4, padding = 2, bias=False)
-        self.decode_t_conv2 = nn.ConvTranspose1d(64, 64, kernel_size=13, stride=3, padding = 0, output_padding =0, bias=False)
-
+        self.decode_t_conv2 = nn.ConvTranspose1d(64, 64, kernel_size=4, stride=4, padding = 2, bias=False)
         self.decode_bn2 = nn.BatchNorm1d(64)
-        #self.decode_t_conv3 = nn.ConvTranspose1d(64, 1, kernel_size=3, stride=3, padding = 2, output_padding=1, bias=False)
-        self.decode_t_conv3 = nn.ConvTranspose1d(64,1,kernel_size=12,stride=3,padding=0,output_padding=0, bias=False)
-        
+        self.decode_t_conv3 = nn.ConvTranspose1d(64, 1, kernel_size=3, stride=3, padding = 2, output_padding=1, bias=False)
+
         self.predictor_conv1 = nn.Conv1d(128, 128, kernel_size=3, stride=1, padding=1, bias=False)
         self.predictor_bn1 = nn.BatchNorm1d(128)
 
@@ -184,8 +178,8 @@ class ResnetEncoder(nn.Module):
         self.predictor_conv2 = nn.Conv1d(128, 128, kernel_size=3, stride=1, padding=1, bias=False)
         self.predictor_bn2 = nn.BatchNorm1d(128)
         self.predictor_conv3 = nn.Conv1d(128, 128, kernel_size=3, stride=1, padding=1, bias=False)
-        #self.predictor_fc = nn.Linear(in_features=896, out_features=2)
-        self.predictor_fc = nn.Linear(in_features=4608, out_features=2)
+        self.predictor_fc = nn.Linear(in_features=896, out_features=2)
+
 
         for m in self.modules():
             if isinstance(m, nn.Conv1d):
@@ -206,7 +200,6 @@ class ResnetEncoder(nn.Module):
         layers = []
         layers.append(block(inplanes, planes, stride, downsample))
 
-        # what is this forloop for?
         for i in range(1, blocks):
             layers.append(block(planes, planes))
         return nn.Sequential(*layers)
@@ -227,49 +220,32 @@ class ResnetEncoder(nn.Module):
         return x
 
     def decode(self, x):
-        #print("decode:")
         x = self.decode_t_conv1(x)
-        #print(x.size())
         x = self.decode_bn1(x)
-        #print(x.size())
         x = self.relu(x)
         x = self.decode_layer1(x)
-        #print(x.size())
-        x = self.decode_layer2(x) #why is there a second layer here, it was not shown in the paper
-        #print(x.size())
+        x = self.decode_layer2(x)
         x = self.decode_t_conv2(x)
-        #print(x.size())
         x = self.decode_bn2(x)
         x = self.relu(x)
         x = self.decode_t_conv3(x)
-        #print(x.size())
 
         return x
 
     def encode(self, x):
         x = self.conv1(x)
-        #print("encode:")
-        #print(x.size())
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool1(x)
-        #print(x.size())
         x = self.layer1(x)
-        #print(x.size())
         x = self.avgpool(x)
-        #print(x.size())
         x = self.layer2(x)
-        #print(x.size())
         x = self.avgpool(x)
-        #print(x.size())
         x = self.conv2(x)
-        #print(x.size())
         x = self.bn2(x)
         x = self.relu(x)
         x = self.maxpool2(x)
-        #print(x.size())
         x = self.conv3(x)
-        #print(x.size())
 
         return x
     def forward(self, x):
@@ -281,16 +257,12 @@ class ResnetEncoder(nn.Module):
 # Train PmPNet
 def NetTrain(wdir,train_log,net_model,train_loader,learning_rate,num_epochs,batch_size,device):
     model = ResnetEncoder(BasicBlock, DecodeBlock, [2, 2], 2)
-    if device.type == "cuda":
-        model.cuda()
+    model.cuda()
     
     f = open(f"{wdir}/{train_log}.txt","w")
     f.close()
 
-    if device.type == "cuda":
-        class_weights = torch.FloatTensor([20.]).cuda()
-    else:
-        class_weights = torch.FloatTensor([20.])
+    class_weights = torch.FloatTensor([20.]).cuda()
     criterion = nn.MSELoss(reduction='mean')
     PmPcriterion = torch.nn.BCEWithLogitsLoss(pos_weight = class_weights)
     traveltimecriterion = nn.L1Loss(reduction='mean')
@@ -354,7 +326,6 @@ def pr_curve(p_threshold, model, test_data, dev):
             labels = labels.to(dev)
             latents = model.encode(images)
             predicted_prob = m(model.predictor(latents)[:, 0])
-            print(model.predictor(latents)[:, 0])
             for i in range(len(labels)):
                 for j in range(len(p_threshold)):
                     if predicted_prob[i] > p_threshold[j]:
@@ -370,8 +341,6 @@ def pr_curve(p_threshold, model, test_data, dev):
     precision = (TP+0.01)/(TP+FP+0.01)
     recall = (TP+0.01)/(TP+FN+0.01)
     return [precision, recall]
-
-
 
 def netevalu(wdir,net_model,prcurve_file,predict_file,test_loader,device):
     model = ResnetEncoder(BasicBlock, DecodeBlock, [2, 2], 2)
@@ -449,7 +418,7 @@ def plot_modeva(wdir,train_log,prcurve_file,predict_file,plot_fname):
     ax1.semilogy(data['epoch'][np.arange(0,len(data['epoch']),rate)], data['residual'][np.arange(0,len(data['epoch']),rate)], "o", markersize=6, color = "black")
     ax1.set_xlabel('Epoch',font2)
     ax1.set_ylabel('Loss',font2)
-    plt.grid(visible=True, which='minor', color='#999999', linestyle='-', alpha=0.2) # the previous version was b = False
+    plt.grid(visible=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
     ax1.set_ylim(0.5*min(data['residual']),1.2*max(data['residual']),)
     ax1.yaxis.grid(True)
     ax1.set_xlim(-0.05,0.05+80)
